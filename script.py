@@ -2,19 +2,18 @@ from simple_salesforce import Salesforce, SalesforceLogin
 import requests
 import pandas as pd
 from io import StringIO
-# only want going forward in the future 2 years
+
+
+
 sf = Salesforce(username='nmondello@rjreliance.com.dev6',password='Monde100$', security_token='T8sz4CxJtqQfZaI38K8mks0e', domain = 'test')
-query = "SELECT pse__Project__r.pse__Opportunity__r.Sales_Channel__c FROM pse__Est_Vs_Actuals__c" #join to project table and join back to opportunity table, then pull forward sales channel
-response = sf.query(query)
-records = response["records"]
-
-for i in range(len(records)):
-    try:
-        print(records[i]["pse__Project__r"]["pse__Opportunity__r"]["Sales_Channel__c"])
-    except:
-        print("No Opportunity")
-
+#query = "SELECT Name,  FROM pse__Est_Vs_Actuals__c" #join to project table and join back to opportunity table, then pull forward sales channel
+query = """
+SELECT Name, pse__Estimated_Hours__c, pse__Project__r.pse__Opportunity__r.Sales_Channel__c FROM pse__Est_Vs_Actuals__c
+"""
+response = sf.query_all(query)
+records = response['records']
 temp = response['records']
+
 
 # Create a DataFrame to store the retrieved data
 df = pd.DataFrame(records)
