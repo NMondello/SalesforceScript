@@ -19,17 +19,30 @@ df = pd.DataFrame(records)
 
 # Select the desired columns
 df = df[['Name', 'pse__Start_Date__c', 'pse__Estimated_Hours__c', 'pse__Project__r']]
+df.columns = ['Name', 'Start Date', 'FTE', 'Type']
 
-for i in range(len(records)):
+
+#Loop and identify types
+for i in range(len(temp)):
     try:
-        df.loc[i, 'pse__Project__r'] =  str(temp[i]["pse__Project__r"]["pse__Opportunity__r"]["Sales_Channel__c"])
+        currentType = str(temp[i]["pse__Project__r"]["pse__Opportunity__r"]["Sales_Channel__c"])
+        if ('Partner Referral - ADP' in currentType):
+            df.loc[i, 'Type'] = 'ADP Services'
+        elif ('Partner Referral - UKG Service' in currentType):
+            df.loc[i, 'Type'] = 'UKG Services'
+        elif ('Partner Referral - UKG' in currentType):
+            df.loc[i, 'Type'] = 'UKG Direct Sales'
+        elif ('SaaS Direct Sales' in currentType):
+            df.loc[i, 'Type'] = 'SaaS Direct Sales'
+        else:
+            df.loc[i, 'Type'] =  'All Other Direct Sales'
     except:
-        df.loc[i, 'pse__Project__r'] = "No Opportunity"
+        df.loc[i, 'Type'] = "No Opportunity"
 
 # Divide the "Estimate_Hours__c" values by 40
-df['pse__Estimated_Hours__c'] = df['pse__Estimated_Hours__c'] / 40.0
+df['FTE'] = df['FTE'] / 40.0
 
 # Export the data to Excel
-writer = pd.ExcelWriter('Salesforce2 Output.xlsx') #this will write the file to the same folder where this program is kept
+writer = pd.ExcelWriter('Salesforce3 Output.xlsx') #this will write the file to the same folder where this program is kept
 df.to_excel(writer,index=False,header=True)
 writer.close()
