@@ -6,26 +6,25 @@ from io import StringIO
 
 
 sf = Salesforce(username='nmondello@rjreliance.com.dev6',password='Monde100$', security_token='T8sz4CxJtqQfZaI38K8mks0e', domain = 'test')
-#query = "SELECT Name,  FROM pse__Est_Vs_Actuals__c" #join to project table and join back to opportunity table, then pull forward sales channel
+
 query = """
-SELECT Name, pse__Estimated_Hours__c, pse__Project__r.pse__Opportunity__r.Sales_Channel__c FROM pse__Est_Vs_Actuals__c
+SELECT Name, pse__Start_Date__c, pse__Estimated_Hours__c, pse__Project__r.pse__Opportunity__r.Sales_Channel__c FROM pse__Est_Vs_Actuals__c
 """
 response = sf.query_all(query)
 records = response['records']
 temp = response['records']
 
-
 # Create a DataFrame to store the retrieved data
 df = pd.DataFrame(records)
 
 # Select the desired columns
-df = df[['Name', 'pse__Estimated_Hours__c', 'pse__Project__r']]
+df = df[['Name', 'pse__Start_Date__c', 'pse__Estimated_Hours__c', 'pse__Project__r']]
 
-for i in range(len(temp)):
+for i in range(len(records)):
     try:
-        df.at[i, 'pse__Project__r'] = temp[i]["pse__Project__r"]["pse__Opportunity__r"]["Sales_Channel__c"]
+        df.loc[i, 'pse__Project__r'] =  str(temp[i]["pse__Project__r"]["pse__Opportunity__r"]["Sales_Channel__c"])
     except:
-        df.at[i, 'pse__Project__r'] = "No Opportunity"
+        df.loc[i, 'pse__Project__r'] = "No Opportunity"
 
 # Divide the "Estimate_Hours__c" values by 40
 df['pse__Estimated_Hours__c'] = df['pse__Estimated_Hours__c'] / 40.0
