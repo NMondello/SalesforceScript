@@ -8,7 +8,7 @@ from io import StringIO
 sf = Salesforce(username='nmondello@rjreliance.com.dev6',password='Monde100$', security_token='T8sz4CxJtqQfZaI38K8mks0e', domain = 'test')
 
 query = """
-SELECT Name, pse__Start_Date__c, pse__Estimated_Hours__c, pse__Project__r.pse__Opportunity__r.Sales_Channel__c FROM pse__Est_Vs_Actuals__c
+SELECT Name, pse__Project__r.pse__Opportunity__r.pse__Region__r.Name, pse__Start_Date__c, pse__Estimated_Hours__c, pse__Project__r.pse__Opportunity__r.Sales_Channel__c FROM pse__Est_Vs_Actuals__c
 """
 response = sf.query_all(query)
 records = response['records']
@@ -18,9 +18,15 @@ temp = response['records']
 df = pd.DataFrame(records)
 
 # Select the desired columns
-df = df[['Name', 'pse__Start_Date__c', 'pse__Estimated_Hours__c', 'pse__Project__r']]
-df.columns = ['Name', 'Start Date', 'FTE', 'Type']
+df = df[['Name', 'pse__Project__r', 'pse__Start_Date__c', 'pse__Estimated_Hours__c', 'pse__Project__r']]
+df.columns = ['Name', 'Region', 'Start Date', 'FTE', 'Type']
 
+#Loop to get regions
+for i in range(len(temp)):
+    try:
+        df.loc[i, 'Region'] = temp[i]["pse__Project__r"]["pse__Opportunity__r"]['pse__Region__r']["Name"]
+    except:
+        df.loc[i, 'Region'] = 'Unlisted'
 
 #Loop and identify types
 for i in range(len(temp)):
