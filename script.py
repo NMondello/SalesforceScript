@@ -14,23 +14,24 @@ for i in range(len(records)):
     except:
         print("No Opportunity")
 
-#for record in records:
-    #name = record['Name']
-    #estimate_hours = record['pse__Estimated_Hours__c']
-    # Perform operations on the retrieved values
-    #FTI = estimate_hours/40.0
-    # Example: print the name and estimate hours
-    #print(f"Item Name: {name}, FTI: {FTI}")
+temp = response['records']
 
 # Create a DataFrame to store the retrieved data
-# df = pd.DataFrame(records)
-#
-# # Select the desired columns
-# df = df[['Name', 'pse__Project__c']]
-#
-# # Divide the "Estimate_Hours__c" values by 40
-# #df['pse__Estimated_Hours__c'] = df['pse__Estimated_Hours__c'] / 40.0
-#
-# # Export the data to Excel
-# writer = pd.ExcelWriter('Salesforce Output.xlsx') #this will write the file to the same folder where this program is kept
-# df.to_excel(writer,index=False,header=True)
+df = pd.DataFrame(records)
+
+# Select the desired columns
+df = df[['Name', 'pse__Estimated_Hours__c', 'pse__Project__r']]
+
+for i in range(len(temp)):
+    try:
+        df.at[i, 'pse__Project__r'] = temp[i]["pse__Project__r"]["pse__Opportunity__r"]["Sales_Channel__c"]
+    except:
+        df.at[i, 'pse__Project__r'] = "No Opportunity"
+
+# Divide the "Estimate_Hours__c" values by 40
+df['pse__Estimated_Hours__c'] = df['pse__Estimated_Hours__c'] / 40.0
+
+# Export the data to Excel
+writer = pd.ExcelWriter('Salesforce2 Output.xlsx') #this will write the file to the same folder where this program is kept
+df.to_excel(writer,index=False,header=True)
+writer.close()
