@@ -32,11 +32,6 @@ for i in range(len(temp)):
 
 #Loop and identify types
 for i in range(len(temp)):
-
-    #get person's name out of long name value
-    currentName = " ".join(str(temp[i]["Name"]).split("-")[-2].split()[:-1])
-    df.loc[i, "Name"] = currentName
-
     try:
         currentType = str(temp[i]["pse__Project__r"]["pse__Opportunity__r"]["Sales_Channel__c"])
         if ('Partner Referral - ADP' in currentType):
