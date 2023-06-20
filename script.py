@@ -10,7 +10,8 @@ sf = Salesforce(username='nmondello@rjreliance.com.dev6',password='Monde100$', s
 #Query to get name, region, start date, estimated hours, sales channel
 #__r signifies a relationship object
 query = """
-SELECT Name, pse__Project__r.pse__Opportunity__r.pse__Region__r.Name, pse__Start_Date__c, pse__Estimated_Hours__c, pse__Project__r.pse__Opportunity__r.Sales_Channel__c FROM pse__Est_Vs_Actuals__c
+SELECT pse__Resource__r.Name, pse__Project__r.pse__Opportunity__r.pse__Region__r.Name, pse__Start_Date__c, pse__Estimated_Hours__c, pse__Project__r.pse__Opportunity__r.Sales_Channel__c FROM pse__Est_Vs_Actuals__c
+WHERE pse__Start_Date__c > THIS_WEEK AND pse__Start_Date__c < NEXT_N_YEARS:2
 """
 response = sf.query_all(query)
 records = response['records']
@@ -20,8 +21,16 @@ temp = response['records']
 df = pd.DataFrame(records)
 
 # Select the desired columns and rename.
-df = df[['Name', 'pse__Project__r', 'pse__Start_Date__c', 'pse__Estimated_Hours__c', 'pse__Project__r']]
-df.columns = ['Name', 'Region', 'Start Date', 'FTE', 'Type']
+df = df[['pse__Resource__r', 'pse__Project__r', 'pse__Start_Date__c', 'pse__Estimated_Hours__c', 'pse__Project__r']]
+df.columns = ['Name', 'Region', 'Date', 'FTE', 'Type']
+
+
+#Loop for names, then sort alph
+for i in range(len(temp)):
+    try:
+        df.loc[i, 'Name'] = temp[i]["pse__Resource__r"]['Name']
+    except:
+        df.loc[i, 'Name'] = 'N/A'
 
 #Loop to get regions
 for i in range(len(temp)):
@@ -32,11 +41,6 @@ for i in range(len(temp)):
 
 #Loop and identify types
 for i in range(len(temp)):
-
-    #get person's name out of long name value
-    currentName = " ".join(str(temp[i]["Name"]).split("-")[-2].split()[:-1])
-    df.loc[i, "Name"] = currentName
-
     try:
         currentType = str(temp[i]["pse__Project__r"]["pse__Opportunity__r"]["Sales_Channel__c"])
         if ('Partner Referral - ADP' in currentType):
@@ -55,6 +59,10 @@ for i in range(len(temp)):
 # Divide the "Estimate_Hours__c" values by 40
 df['FTE'] = df['FTE'] / 40.0
 
+#Sorts by week, and adds the FTE
+df['Date'] = pd.to_datetime(df['Date']) - pd.to_timedelta(7, unit='d')
+df = df.groupby(['Name', 'Region', pd.Grouper(key='Date', freq='W-MON'), pd.Grouper(key='Type')])['FTE'].sum().reset_index().sort_values('Date')
+df = df.sort_values(['Name', 'Date'])
 # Export the data to Excel
 writer = pd.ExcelWriter('Salesforce3 Output.xlsx') #this will write the file to the same folder where this program is kept
 df.to_excel(writer,index=False,header=True)
