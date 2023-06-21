@@ -87,10 +87,13 @@ df = df.groupby(['Name', 'Region', pd.Grouper(key='Date', freq='W-MON'), pd.Grou
      FTE_Expected = ('FTE-E','sum'),
      FTE_Actual = ('FTE-A','sum'),
      Estimate_Dollars = ('Estimate Dollars', 'sum'),
-     Actual_Dollars = ('Actual Dollars', 'sum')
+     Actual_Dollars = ('Actual Dollars', 'sum'),
      ).reset_index().sort_values('Date')
 df = df.sort_values(['Name', 'Date'])
 
+#Get totals
+df['Total FTE'] = df.apply(lambda x: x['FTE_Actual'] - x['FTE_Expected'], axis=1)
+df['Total Dollars'] = df.apply(lambda x: x['Actual_Dollars'] - x['Estimate_Dollars'], axis=1)
 # Export the data to Excel
 writer = pd.ExcelWriter('Salesforce3 Output.xlsx') #this will write the file to the same folder where this program is kept
 df.to_excel(writer,index=False,header=True)
