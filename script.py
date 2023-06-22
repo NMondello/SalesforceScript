@@ -12,8 +12,8 @@ sf = Salesforce(username='nmondello@rjreliance.com.dev6',password='Monde100$', s
 #__r signifies a relationship object
 query = """
 SELECT pse__Resource__r.Name, pse__Resource__r.pse__Region__r.Name, 
-pse__Start_Date__c, pse__Estimated_Hours__c, pse__Actual_Hours__c, pse__Project__r.pse__Opportunity__r.Sales_Channel__c, pse__Project__r.pse__Is_Billable__c, Actual_Dollars__c, Estimated_Dollars__c FROM pse__Est_Vs_Actuals__c
-WHERE pse__Start_Date__c > THIS_WEEK AND pse__Start_Date__c < NEXT_N_YEARS:2
+pse__Start_Date__c, pse__Estimated_Hours__c, pse__Actual_Hours__c, pse__Project__r.pse__Opportunity__r.Sales_Channel__c, pse__Project__r.pse__Is_Billable__c, Estimated_Dollars__c, Actual_Dollars__c FROM pse__Est_Vs_Actuals__c
+WHERE pse__Start_Date__c > 2023-03-01 AND pse__Start_Date__c < NEXT_N_YEARS:2
 """
 response = sf.query_all(query)
 records = response['records']
@@ -23,8 +23,8 @@ temp = response['records']
 df = pd.DataFrame(records)
 
 # Select the desired columns and rename.
-df = df[['pse__Resource__r', 'pse__Resource__r', 'pse__Start_Date__c', 'pse__Estimated_Hours__c', 'pse__Actual_Hours__c', 'pse__Project__r', 'pse__Project__r','Actual_Dollars__c', 'Estimated_Dollars__c']]
-df.columns = ['Name', 'Region', 'Date', 'FTE-E', 'FTE-A', 'Type', 'Billable', 'Actual Dollars', 'Estimate Dollars']
+df = df[['pse__Resource__r', 'pse__Resource__r', 'pse__Start_Date__c', 'pse__Estimated_Hours__c', 'pse__Actual_Hours__c', 'pse__Project__r', 'pse__Project__r', 'Estimated_Dollars__c', 'Actual_Dollars__c']]
+df.columns = ['Name', 'Region', 'Date', 'FTE-E', 'FTE-A', 'Type', 'Billable', 'Estimate Dollars', 'Actual Dollars']
 
 #Loop for names, then sort alph
 for i in range(len(temp)):
