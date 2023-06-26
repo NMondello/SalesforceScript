@@ -5,7 +5,7 @@ from io import StringIO
 
 
 
-sf = Salesforce(username='nmondello@rjreliance.com.dev6',password='Monde100$', security_token='T8sz4CxJtqQfZaI38K8mks0e', domain = 'test')
+sf = Salesforce(username='USER',password='PASS', security_token='TOKEN', domain = 'test')
 
 #Query to get name, region, start date, estimated hours, sales channel
 #__r signifies a relationship object
