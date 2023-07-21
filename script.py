@@ -6,7 +6,7 @@ import numpy as np
 
 
 
-sf = Salesforce(username='nmondello@rjreliance.com.dev6',password='Monde100$', security_token='T8sz4CxJtqQfZaI38K8mks0e', domain = 'test')
+sf = Salesforce(username='nmondello@rjreliance.com.dev6',password='Monde100$', security_token='1xu6QYEXpcpUhh047ZjZNSnS', domain = 'test')
 
 #Query to get name, region, start date, estimated hours, sales channel
 #__r signifies a relationship object
@@ -81,6 +81,7 @@ df['FTE-A'] = df['FTE-A'] / 40.0
 #Get rid of rows that have 0 hours worked.
 df= df[df['FTE-E'] != 0]
 
+
 #Sorts by week, and adds the FTE
 df['Date'] = pd.to_datetime(df['Date']) - pd.to_timedelta(7, unit='d')
 df = df.groupby(['Name', 'Region', pd.Grouper(key='Date', freq='W-MON'), pd.Grouper(key='Type')]).agg(
@@ -92,9 +93,19 @@ df = df.groupby(['Name', 'Region', pd.Grouper(key='Date', freq='W-MON'), pd.Grou
 df = df.sort_values(['Name', 'Date'])
 
 #Get totals
-df['Total FTE'] = df.apply(lambda x: x['FTE_Actual'] - x['FTE_Expected'], axis=1)
-df['Total Dollars'] = df.apply(lambda x: x['Actual_Dollars'] - x['Estimate_Dollars'], axis=1)
+# df['Total FTE'] = df.apply(lambda x: x['FTE_Actual'] - x['FTE_Expected'], axis=1)
+# df['Total Dollars'] = df.apply(lambda x: x['Actual_Dollars'] - x['Estimate_Dollars'], axis=1)
+
+df_expected = pd.pivot_table(df, values='FTE_Expected', index=['Date', 'Name', 'Region'], columns='Type', aggfunc='sum', fill_value=0)
+df_actual = df.pivot_table(values='FTE_Actual', index=['Date', 'Name', 'Region'], columns='Type', aggfunc='sum', fill_value=0)
+
+df_expected = df_expected.reset_index()
+df_actual = df_actual.reset_index()
+
+df_combined = pd.merge(df_expected, df_actual, on=['Date', 'Name', 'Region'], suffixes=('_E', '_A'))
+df_combined['FTE_E Sum'] = df_combined[['ADP Services_E', 'All Other Direct Sales_E', 'Non-Billable_E', 'UKG Direct Sales_E']].apply(sum, axis=1)
+df_combined['FTE_A Sum'] = df_combined[['ADP Services_A', 'All Other Direct Sales_A', 'Non-Billable_A', 'UKG Direct Sales_A']].apply(sum, axis=1)
 # Export the data to Excel
 writer = pd.ExcelWriter('Salesforce3 Output.xlsx') #this will write the file to the same folder where this program is kept
-df.to_excel(writer,index=False,header=True)
+df_combined.to_excel(writer,index=False,header=True)
 writer.close()
