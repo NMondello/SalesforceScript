@@ -6,7 +6,7 @@ import numpy as np
 
 
 
-sf = Salesforce(username='nmondello@rjreliance.com.dev6',password='Monde100$', security_token='1xu6QYEXpcpUhh047ZjZNSnS', domain = 'test')
+sf = Salesforce(username='',password='', security_token='', domain = 'test')
 
 #Query to get name, region, start date, estimated hours, sales channel
 #__r signifies a relationship object
